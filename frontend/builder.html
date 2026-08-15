@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Resume Builder - Smart Resume</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <i class="fa-solid fa-wand-magic-sparkles"></i> AI Resume
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="builder.html" style="color:var(--color-primary);">Resume Builder</a></li>
+      <li><a href="analyzer.html">ATS Analyzer</a></li>
+      <li id="authLink"><a href="login.html" class="btn btn-secondary btn-sm">Sign In</a></li>
+    </ul>
+  </nav>
+
+  <div class="container" style="max-width: 1400px;">
+    <!-- Builder Controls -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem; flex-wrap:wrap; gap: 1rem;">
+      <div>
+        <h2 style="font-size: 1.8rem;">Create Resume</h2>
+        <p style="color:var(--text-muted); font-size:0.9rem;">Fill in your details to compile a professional resume.</p>
+      </div>
+      <div style="display:flex; gap:0.5rem; align-items:center;">
+        <label for="templateSelect" style="font-size:0.85rem; font-weight:600; text-transform:uppercase; color:var(--text-muted);">Template:</label>
+        <select id="templateSelect" class="form-control" style="width:130px; padding:0.5rem;" onchange="updatePreview()">
+          <option value="modern">Modern</option>
+          <option value="classic">Classic</option>
+          <option value="creative">Creative</option>
+        </select>
+        <button onclick="saveResume()" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Save
+        </button>
+        <button onclick="exportPDF()" class="btn btn-success btn-sm">
+          <i class="fa-solid fa-file-pdf"></i> Export PDF
+        </button>
+        <button onclick="sendToAnalyzer()" class="btn btn-secondary btn-sm" style="border-color: var(--color-secondary);">
+          <i class="fa-solid fa-microchip"></i> Run AI Analyzer
+        </button>
+      </div>
+    </div>
+
+    <!-- Error/Success Banner -->
+    <div id="notifyBanner" style="display:none; padding:0.75rem 1rem; border-radius:var(--radius-md); margin-bottom: 1.5rem; font-size:0.9rem;"></div>
+
+    <!-- Split Pane Workspace -->
+    <div class="builder-layout">
+      
+      <!-- Input Sidebar -->
+      <div class="builder-sidebar glass-panel">
+        
+        <!-- Document Meta -->
+        <div class="form-group">
+          <label for="resumeTitle">Resume Title</label>
+          <input type="text" id="resumeTitle" class="form-control" value="My Professional Resume" placeholder="e.g. Senior Java Dev CV" oninput="updatePreview()">
+        </div>
+
+        <hr style="border:0; border-top:1px solid var(--border-glass); margin: 1.5rem 0;">
+
+        <!-- Personal Details -->
+        <h3 style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--color-primary);">Personal Details</h3>
+        
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" class="form-control" value="Alice Smith" placeholder="Alice Smith" oninput="updatePreview()">
+        </div>
+        
+        <div class="grid-2" style="gap:1rem;">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" class="form-control" value="alice@example.com" placeholder="alice@example.com" oninput="updatePreview()">
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="text" id="phone" class="form-control" value="123-456-7890" placeholder="123-456-7890" oninput="updatePreview()">
+          </div>
+        </div>
+
+        <div class="grid-2" style="gap:1rem;">
+          <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" id="location" class="form-control" value="New York, NY" placeholder="New York, NY" oninput="updatePreview()">
+          </div>
+          <div class="form-group">
+            <label for="website">Website / LinkedIn</label>
+            <input type="url" id="website" class="form-control" value="https://alice.dev" placeholder="https://linkedin.com/in/..." oninput="updatePreview()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="summary">Professional Summary</label>
+          <textarea id="summary" class="form-control" placeholder="Brief statement about your career achievements and profile..." oninput="updatePreview()">Experienced Full Stack Engineer with a passion for building scalable web applications. Proficient in Node.js, React, and Python AI integration.</textarea>
+        </div>
+
+        <hr style="border:0; border-top:1px solid var(--border-glass); margin: 1.5rem 0;">
+
+        <!-- Skills Section -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+          <h3 style="font-size:1.2rem; color:var(--color-primary);">Technical Skills</h3>
+          <p style="font-size:0.8rem; color:var(--text-muted);">Separate with commas</p>
+        </div>
+        <div class="form-group">
+          <input type="text" id="skillsInput" class="form-control" value="JavaScript, Node.js, React, Python, SQL, Docker, Git" placeholder="Java, Express, AWS, SQL" oninput="updatePreview()">
+        </div>
+
+        <hr style="border:0; border-top:1px solid var(--border-glass); margin: 1.5rem 0;">
+
+        <!-- Experience Section -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+          <h3 style="font-size:1.2rem; color:var(--color-primary);">Work Experience</h3>
+          <button onclick="addExperienceRow()" class="btn btn-secondary btn-sm">
+            <i class="fa-solid fa-plus"></i> Add
+          </button>
+        </div>
+        <div id="experienceContainer">
+          <!-- Dynamic Row -->
+          <div class="glass-panel experience-row" style="padding:1rem; margin-bottom:1rem; border-color: rgba(255,255,255,0.05);">
+            <div class="form-group">
+              <label>Company</label>
+              <input type="text" class="form-control exp-company" value="Tech Corp" placeholder="e.g. Google" oninput="updatePreview()">
+            </div>
+            <div class="form-group">
+              <label>Role</label>
+              <input type="text" class="form-control exp-role" value="Software Engineer" placeholder="e.g. Senior Developer" oninput="updatePreview()">
+            </div>
+            <div class="form-group">
+              <label>Duration</label>
+              <input type="text" class="form-control exp-duration" value="2020 - Present" placeholder="e.g. Jan 2021 - Present" oninput="updatePreview()">
+            </div>
+            <div class="form-group">
+              <label>Description / Core Accomplishments</label>
+              <textarea class="form-control exp-desc" placeholder="Describe achievements..." oninput="updatePreview()">Developed microservices in Node.js and improved search performance by 40% using Redis. Collaborated with AI team to deploy Python scoring pipelines.</textarea>
+            </div>
+            <button onclick="removeRow(this)" class="btn btn-secondary btn-sm" style="color:var(--color-danger); border-color:rgba(239, 68, 68, 0.2); width:100%;">
+              <i class="fa-solid fa-trash"></i> Remove Entry
+            </button>
+          </div>
+        </div>
+
+        <hr style="border:0; border-top:1px solid var(--border-glass); margin: 1.5rem 0;">
+
+        <!-- Education Section -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+          <h3 style="font-size:1.2rem; color:var(--color-primary);">Education</h3>
+          <button onclick="addEducationRow()" class="btn btn-secondary btn-sm">
+            <i class="fa-solid fa-plus"></i> Add
+          </button>
+        </div>
+        <div id="educationContainer">
+          <!-- Dynamic Row -->
+          <div class="glass-panel education-row" style="padding:1rem; margin-bottom:1rem; border-color: rgba(255,255,255,0.05);">
+            <div class="form-group">
+              <label>School / University</label>
+              <input type="text" class="form-control edu-school" value="State University" placeholder="e.g. MIT" oninput="updatePreview()">
+            </div>
+            <div class="form-group">
+              <label>Degree / Field of Study</label>
+              <input type="text" class="form-control edu-degree" value="B.S. Computer Science" placeholder="e.g. Master of Data Analysis" oninput="updatePreview()">
+            </div>
+            <div class="form-group">
+              <label>Graduation Year</label>
+              <input type="text" class="form-control edu-year" value="2020" placeholder="e.g. 2021" oninput="updatePreview()">
+            </div>
+            <button onclick="removeRow(this)" class="btn btn-secondary btn-sm" style="color:var(--color-danger); border-color:rgba(239, 68, 68, 0.2); width:100%;">
+              <i class="fa-solid fa-trash"></i> Remove Entry
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Preview Canvas -->
+      <div class="builder-preview-pane">
+        <div id="resumePreview" class="resume-preview-content">
+          <!-- Rendered markup goes here -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/builder.js"></script>
+</body>
+</html>

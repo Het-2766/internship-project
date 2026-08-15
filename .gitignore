@@ -1,0 +1,14 @@
+# Environment variables
+backend/.env
+.env
+
+# Dependencies
+backend/node_modules/
+ai_services/venv/
+ai_services/temp_uploads/
+
+# IDE / System files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

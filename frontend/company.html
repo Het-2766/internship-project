@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recruiter & Applicant Tracker Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js CDN for Recruiter Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <i class="fa-solid fa-wand-magic-sparkles"></i> AI Resume
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="company.html" style="color:var(--color-primary);">Company Portal</a></li>
+      <li id="authLink"><a href="login.html" class="btn btn-secondary btn-sm">Sign In</a></li>
+    </ul>
+  </nav>
+
+  <div class="container" style="max-width: 1400px;">
+    
+    <!-- Header banner -->
+    <div style="margin-bottom: 2.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h2 style="font-size: 2rem;" id="companyGreeting">Recruiter Dashboard</h2>
+        <p style="color:var(--text-muted); font-size:0.95rem;">Track applications, filter by ATS match scores, and shortlist talent.</p>
+      </div>
+      <div style="display:flex; gap:0.75rem;">
+        <button onclick="openAddCandidateModal()" class="btn btn-primary btn-sm"><i class="fa-solid fa-user-plus"></i> Add Candidate Resume</button>
+        <button onclick="logout()" class="btn btn-secondary btn-sm"><i class="fa-solid fa-power-off"></i> Logout</button>
+      </div>
+    </div>
+
+    <!-- Analytical stats widgets -->
+    <div class="grid-3" style="margin-bottom: 3rem;">
+      
+      <!-- Total Candidates -->
+      <div class="glass-panel" style="display:flex; align-items:center; gap:1.5rem; padding: 1.5rem 2rem;">
+        <div class="icon-wrapper" style="margin:0; background:rgba(99,102,241,0.15); width:50px; height:50px;">
+          <i class="fa-solid fa-users" style="font-size:1.2rem;"></i>
+        </div>
+        <div>
+          <p style="color:var(--text-muted); font-size:0.85rem; text-transform:uppercase; font-weight:600;">Total Database Applicants</p>
+          <h2 style="font-size:1.8rem;" id="statTotalApplicants">0</h2>
+        </div>
+      </div>
+
+      <!-- Shortlisted Candidates -->
+      <div class="glass-panel" style="display:flex; align-items:center; gap:1.5rem; padding: 1.5rem 2rem;">
+        <div class="icon-wrapper" style="margin:0; background:rgba(16,185,129,0.15); color:var(--color-success); width:50px; height:50px;">
+          <i class="fa-solid fa-user-check" style="font-size:1.2rem;"></i>
+        </div>
+        <div>
+          <p style="color:var(--text-muted); font-size:0.85rem; text-transform:uppercase; font-weight:600;">Active Shortlisted Candidates</p>
+          <h2 style="font-size:1.8rem;" id="statShortlisted">0</h2>
+        </div>
+      </div>
+
+      <!-- Average ATS Match -->
+      <div class="glass-panel" style="display:flex; align-items:center; gap:1.5rem; padding: 1.5rem 2rem;">
+        <div class="icon-wrapper" style="margin:0; background:rgba(245,158,11,0.15); color:var(--color-warning); width:50px; height:50px;">
+          <i class="fa-solid fa-circle-nodes" style="font-size:1.2rem;"></i>
+        </div>
+        <div>
+          <p style="color:var(--text-muted); font-size:0.85rem; text-transform:uppercase; font-weight:600;">Average Candidate ATS Score</p>
+          <h2 style="font-size:1.8rem;" id="statAvgScore">0%</h2>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Main Workspace (Filters, Candidate list & Graph side-by-side) -->
+    <div style="display:grid; grid-template-columns: 1fr 380px; gap:2rem; align-items:start; margin-bottom:3rem;">
+      
+      <!-- Left side: Filters & Table -->
+      <div style="display:flex; flex-direction:column; gap:2rem;">
+        
+        <!-- Filters panel -->
+        <div class="glass-panel" style="padding:1.5rem;">
+          <h3 style="font-size:1.1rem; margin-bottom:1rem;"><i class="fa-solid fa-sliders"></i> Filter Applicants</h3>
+          
+          <div class="grid-3" style="gap:1rem; align-items:end;">
+            
+            <div class="form-group" style="margin:0;">
+              <label for="filterSearch">Search Name / Skill</label>
+              <input type="text" id="filterSearch" class="form-control" placeholder="e.g. Node.js, Alice" oninput="loadCandidatesList()">
+            </div>
+
+            <div class="form-group" style="margin:0;">
+              <label for="filterSkill">Specific Skill Match</label>
+              <input type="text" id="filterSkill" class="form-control" placeholder="e.g. React" oninput="loadCandidatesList()">
+            </div>
+
+            <div class="form-group" style="margin:0;">
+              <label for="filterMinScore">Minimum ATS Score</label>
+              <select id="filterMinScore" class="form-control" onchange="loadCandidatesList()">
+                <option value="">All Scores</option>
+                <option value="80">Excellent (80+)</option>
+                <option value="65">Mid-Level (65+)</option>
+                <option value="50">Fair Match (50+)</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Candidate List Table -->
+        <div class="glass-panel">
+          <h3 style="font-size:1.2rem; margin-bottom:1rem;"><i class="fa-solid fa-list-check"></i> Applicants List</h3>
+          <div style="overflow-x:auto;">
+            <table class="candidate-table">
+              <thead>
+                <tr>
+                  <th>Candidate</th>
+                  <th>Resume Title</th>
+                  <th>Extracted Skills</th>
+                  <th>ATS Match</th>
+                  <th>Tracker Status</th>
+                  <th>Quick Action</th>
+                </tr>
+              </thead>
+              <tbody id="candidatesTableBody">
+                <!-- Dynamic candidate records -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right side: Visual charts panel -->
+      <div class="glass-panel" style="position: sticky; top: 100px;">
+        <h3 style="font-size:1.1rem; margin-bottom:1.5rem; border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem;">
+          <i class="fa-solid fa-chart-pie"></i> Applicant Analytics
+        </h3>
+        
+        <div style="height:250px; position:relative; margin-bottom:1.5rem;">
+          <canvas id="statusChart"></canvas>
+        </div>
+
+        <div style="font-size:0.85rem; color:var(--text-muted);">
+          <p><i class="fa-solid fa-info-circle"></i> Charts represent active tracking distribution status values selected by recruiters.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Candidate Modal Drawer (For detailing candidate resume and updating status) -->
+    <div id="candidateModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
+      <div class="glass-panel" style="width:90%; max-width:800px; max-height:85vh; overflow-y:auto; border-color:var(--color-primary-glow);">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-glass); padding-bottom:1rem; margin-bottom:1.5rem;">
+          <div>
+            <h3 id="modalName" style="font-size:1.5rem;">Candidate Review</h3>
+            <p id="modalEmail" style="color:var(--text-muted); font-size:0.85rem;"></p>
+          </div>
+          <button onclick="closeModal()" class="btn btn-secondary btn-sm" style="padding:0.25rem 0.5rem;"><i class="fa-solid fa-xmark"></i> Close</button>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:1.5rem; gap:1.5rem;">
+          
+          <!-- Column 1: Match Score & Tracker Updates -->
+          <div>
+            <h4 style="color:var(--color-primary); margin-bottom:1rem;">Evaluation & Status</h4>
+            
+            <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+              <span id="modalScoreBadge" class="candidate-score-badge" style="font-size:1.8rem; padding:0.5rem 1rem;">90%</span>
+              <div>
+                <p style="font-weight:600; font-size:0.9rem;" id="modalProfileStrength">Excellent Match</p>
+                <p style="color:var(--text-muted); font-size:0.8rem;">ATS Keywords Score</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="modalStatus">Tracking Status</label>
+              <select id="modalStatus" class="form-control">
+                <option value="applied">Applied</option>
+                <option value="reviewed">Reviewed</option>
+                <option value="shortlisted">Shortlisted</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="modalNotes">Recruiter Notes</label>
+              <textarea id="modalNotes" class="form-control" placeholder="Write internal notes about candidate..." style="height:100px;"></textarea>
+            </div>
+
+            <button onclick="submitStatusUpdate()" class="btn btn-primary btn-sm" style="width:100%;">
+              <i class="fa-solid fa-save"></i> Save Assessment
+            </button>
+          </div>
+
+          <!-- Column 2: Resume fields summary -->
+          <div class="glass-panel" style="background:rgba(0,0,0,0.2); max-height:400px; overflow-y:auto; border-color:transparent; padding:1rem;">
+            <h4 style="margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:0.3rem;">Extracted Resume Text</h4>
+            <div id="modalResumeBody" style="font-size:0.85rem; color:var(--text-main); white-space:pre-line;">
+              <!-- Resume summary or raw text -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Add Candidate Modal -->
+    <div id="addCandidateModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
+      <div class="glass-panel" style="width:90%; max-width:500px; max-height:85vh; overflow-y:auto; border-color:var(--color-primary-glow);">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-glass); padding-bottom:1rem; margin-bottom:1.5rem;">
+          <div>
+            <h3 style="font-size:1.5rem;">Import Candidate Resume</h3>
+            <p style="color:var(--text-muted); font-size:0.85rem;">Upload a resume file and assign candidate details.</p>
+          </div>
+          <button onclick="closeAddCandidateModal()" class="btn btn-secondary btn-sm" style="padding:0.25rem 0.5rem;"><i class="fa-solid fa-xmark"></i> Close</button>
+        </div>
+
+        <form id="addCandidateForm" onsubmit="submitAddCandidate(event)">
+          <div class="form-group">
+            <label for="addCandidateName">Candidate Name (Optional)</label>
+            <input type="text" id="addCandidateName" class="form-control" placeholder="e.g. John Doe (extracted if empty)">
+          </div>
+
+          <div class="form-group">
+            <label for="addCandidateEmail">Candidate Email (Optional)</label>
+            <input type="email" id="addCandidateEmail" class="form-control" placeholder="e.g. john@example.com (extracted if empty)">
+          </div>
+
+          <div class="form-group">
+            <label>Resume File (PDF, DOCX, TXT)</label>
+            <div class="dropzone" id="modalDropzone" onclick="document.getElementById('addCandidateFile').click()" style="padding: 1.5rem; border: 2px dashed rgba(255,255,255,0.1); border-radius: 8px; text-align: center; cursor: pointer; background: rgba(255,255,255,0.02); transition: all 0.3s ease;">
+              <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2rem; color: var(--color-primary); margin-bottom: 0.5rem;"></i>
+              <p id="dropzoneText" style="font-weight: 600; margin-bottom: 0.25rem; font-size: 0.9rem;">Click or drag file here to upload</p>
+              <p style="font-size: 0.75rem; color: var(--text-muted);">PDF, DOCX, TXT up to 10MB</p>
+            </div>
+            <input type="file" id="addCandidateFile" style="display:none;" accept=".pdf,.docx,.txt" required onchange="handleModalFileSelect(event)">
+          </div>
+
+          <div id="addStatus" style="display:none; margin-bottom: 1.5rem; text-align:center; color:var(--color-secondary); font-weight:500;">
+            <i class="fa-solid fa-spinner fa-spin"></i> Processing & analyzing resume...
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%;">
+            <i class="fa-solid fa-plus"></i> Import & Score Candidate
+          </button>
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/company.js"></script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Resume Builder & AI Analyzer</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <i class="fa-solid fa-wand-magic-sparkles"></i> AI Resume
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="builder.html">Resume Builder</a></li>
+      <li><a href="analyzer.html">ATS Analyzer</a></li>
+      <li><a href="company.html" id="navRecruiter">Company Portal</a></li>
+      <li id="authLink"><a href="login.html" class="btn btn-secondary btn-sm">Sign In</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <h1>Supercharge Your Career with AI Resume Optimization</h1>
+    <p>Build stunning ATS-friendly resumes, obtain real-time grammar & keyword analyzer feedback from advanced NLP, and stand out in seconds.</p>
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+      <a href="builder.html" class="btn btn-primary">
+        <i class="fa-solid fa-pen-nib"></i> Build Resume
+      </a>
+      <a href="analyzer.html" class="btn btn-secondary">
+        <i class="fa-solid fa-chart-line"></i> Analyze ATS Score
+      </a>
+    </div>
+  </header>
+
+  <!-- Feature Grid -->
+  <section class="container">
+    <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2rem;">Why Choose AI Resume?</h2>
+    
+    <div class="grid-3">
+      <!-- Feature 1 -->
+      <div class="glass-panel feature-card">
+        <div class="icon-wrapper">
+          <i class="fa-solid fa-pencil"></i>
+        </div>
+        <h3>Live Builder</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">
+          Craft professional formats in real-time. Pick modern templates and customize sections on-the-fly.
+        </p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="glass-panel feature-card">
+        <div class="icon-wrapper">
+          <i class="fa-solid fa-brain"></i>
+        </div>
+        <h3>NLP ATS Analyzer</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">
+          Analyzes spelling, grammar, passive-voice, and keywords matches utilizing spaCy algorithms.
+        </p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="glass-panel feature-card">
+        <div class="icon-wrapper">
+          <i class="fa-solid fa-briefcase"></i>
+        </div>
+        <h3>Recruiter Dashboard</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">
+          Allows companies to filter candidates by score, select top skills, and shortlist applicants.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Statistics Panel -->
+  <section class="container" style="margin-top: 4rem;">
+    <div class="glass-panel" style="display: flex; justify-content: space-around; flex-wrap: wrap; text-align: center; gap: 2rem; padding: 3rem;">
+      <div>
+        <h2 style="font-size: 3rem; color: var(--color-primary);">95%</h2>
+        <p style="color: var(--text-muted);">ATS Passing Rate</p>
+      </div>
+      <div>
+        <h2 style="font-size: 3rem; color: var(--color-secondary);">10k+</h2>
+        <p style="color: var(--text-muted);">Resumes Scored</p>
+      </div>
+      <div>
+        <h2 style="font-size: 3rem; color: var(--color-success);">200+</h2>
+        <p style="color: var(--text-muted);">Hiring Companies</p>
+      </div>
+    </div>
+  </section>
+
+  <footer style="text-align: center; padding: 4rem 1rem 2rem; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid var(--border-glass); margin-top: 5rem;">
+    <p>&copy; 2026 Smart Resume Builder & Analyzer. All rights reserved.</p>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Update navigation based on session status
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getLoggedInUser();
+      const authLink = document.getElementById('authLink');
+      const navRecruiter = document.getElementById('navRecruiter');
+
+      if (user) {
+        authLink.innerHTML = `
+          <span style="margin-right: 1rem; font-weight: 500; font-size: 0.95rem; color: #a5b4fc;">
+            Hi, ${user.name}
+          </span>
+          <button onclick="logout()" class="btn btn-secondary btn-sm" style="display:inline-flex;">Sign Out</button>
+        `;
+        // Recruiter validation
+        if (user.role === 'user') {
+          navRecruiter.style.display = 'none';
+        }
+      } else {
+        navRecruiter.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

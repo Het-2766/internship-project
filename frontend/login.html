@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In - Smart Resume AI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <i class="fa-solid fa-wand-magic-sparkles"></i> AI Resume
+    </a>
+  </nav>
+
+  <div class="container" style="max-width: 450px; margin-top: 4rem;">
+    <div class="glass-panel">
+      
+      <!-- Tab Header -->
+      <div class="tabs">
+        <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Login</button>
+        <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- Error Notification -->
+      <div id="errorBox" style="display:none; color: var(--color-danger); background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.75rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.9rem;">
+        <i class="fa-solid fa-triangle-exclamation"></i> <span id="errorMsg">Error messages go here.</span>
+      </div>
+
+      <!-- Login Form -->
+      <form id="formLogin" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="loginEmail">Email Address</label>
+          <input type="email" id="loginEmail" class="form-control" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top: 1rem;">
+          <i class="fa-solid fa-right-to-bracket"></i> Sign In
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="formRegister" onsubmit="handleRegister(event)" style="display:none;">
+        <div class="form-group">
+          <label for="regName">Full Name</label>
+          <input type="text" id="regName" class="form-control" placeholder="John Doe">
+        </div>
+        <div class="form-group">
+          <label for="regEmail">Email Address</label>
+          <input type="email" id="regEmail" class="form-control" placeholder="john@example.com">
+        </div>
+        <div class="form-group">
+          <label for="regPassword">Password</label>
+          <input type="password" id="regPassword" class="form-control" placeholder="Create Password">
+        </div>
+        <div class="form-group">
+          <label for="regRole">Role</label>
+          <select id="regRole" class="form-control" onchange="toggleIndustryField()">
+            <option value="user">Job Seeker</option>
+            <option value="recruiter">Recruiter / Employer</option>
+          </select>
+        </div>
+        
+        <!-- Recruiter Extra Field -->
+        <div class="form-group" id="industryGroup" style="display:none;">
+          <label for="regIndustry">Company Industry</label>
+          <input type="text" id="regIndustry" class="form-control" placeholder="Finance, SaaS, Health...">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top: 1rem;">
+          <i class="fa-solid fa-user-plus"></i> Create Account
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    const errorBox = document.getElementById('errorBox');
+    const errorMsg = document.getElementById('errorMsg');
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+
+    function hideError() {
+      errorBox.style.display = 'none';
+    }
+
+    function switchTab(mode) {
+      hideError();
+      const tabLogin = document.getElementById('tabLogin');
+      const tabRegister = document.getElementById('tabRegister');
+      const formLogin = document.getElementById('formLogin');
+      const formRegister = document.getElementById('formRegister');
+
+      if (mode === 'login') {
+        tabLogin.classList.add('active');
+        tabRegister.classList.remove('active');
+        formLogin.style.display = 'block';
+        formRegister.style.display = 'none';
+      } else {
+        tabLogin.classList.remove('active');
+        tabRegister.classList.add('active');
+        formLogin.style.display = 'none';
+        formRegister.style.display = 'block';
+      }
+    }
+
+    function toggleIndustryField() {
+      const role = document.getElementById('regRole').value;
+      const industryGroup = document.getElementById('industryGroup');
+      if (role === 'recruiter') {
+        industryGroup.style.display = 'block';
+      } else {
+        industryGroup.style.display = 'none';
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      hideError();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const response = await API.login(email, password);
+        setAuthSession(response.token, response.user);
+        
+        // Redirect based on role
+        if (response.user.role === 'recruiter') {
+          window.location.href = 'company.html';
+        } else {
+          window.location.href = 'builder.html';
+        }
+      } catch (err) {
+        showError(err.message || 'Login failed.');
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      hideError();
+      
+      const name = document.getElementById('regName').value;
+      const email = document.getElementById('regEmail').value;
+      const password = document.getElementById('regPassword').value;
+      const role = document.getElementById('regRole').value;
+      const industry = document.getElementById('regIndustry').value;
+
+      if (!name || !email || !password) {
+        showError('Please fill in all standard registration fields.');
+        return;
+      }
+
+      try {
+        const response = await API.register(name, email, password, role, industry);
+        setAuthSession(response.token, response.user);
+        
+        if (response.user.role === 'recruiter') {
+          window.location.href = 'company.html';
+        } else {
+          window.location.href = 'builder.html';
+        }
+      } catch (err) {
+        showError(err.message || 'Registration failed.');
+      }
+    }
+  </script>
+</body>
+</html>

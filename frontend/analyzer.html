@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Resume & ATS Score Analyzer</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <i class="fa-solid fa-wand-magic-sparkles"></i> AI Resume
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="builder.html">Resume Builder</a></li>
+      <li><a href="analyzer.html" style="color:var(--color-primary);">ATS Analyzer</a></li>
+      <li id="authLink"><a href="login.html" class="btn btn-secondary btn-sm">Sign In</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h2 style="font-size: 2.2rem; margin-bottom: 0.5rem; text-align: center;">AI ATS Resume Analyzer</h2>
+    <p style="color: var(--text-muted); text-align: center; margin-bottom: 3rem;">Upload your resume document (PDF, DOCX, TXT) or check builder scorecards below.</p>
+
+    <!-- Guest Mode Banner Notification -->
+    <div id="authNotice" class="glass-panel" style="display:none; text-align:center; padding:1rem; margin-bottom:2rem; border-color:var(--color-warning); background:rgba(245,158,11,0.05); color:#fbbf24; font-size:0.95rem;">
+      <i class="fa-solid fa-circle-info"></i> <strong>Guest Mode:</strong> You are not signed in. Your analysis results will not be saved or visible to hiring companies. <a href="login.html" style="color:var(--color-primary); font-weight:600; text-decoration:underline;">Sign In / Sign Up</a> to apply.
+    </div>
+
+
+    <!-- Upload & Quick Score Area -->
+    <div class="grid-2" style="margin-bottom: 3rem;">
+      
+      <!-- Upload zone -->
+      <div class="glass-panel" style="display:flex; flex-direction:column; justify-content:center;">
+        <h3 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-file-arrow-up"></i> Upload Document</h3>
+        
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <p style="font-weight: 600; margin-bottom: 0.5rem;">Drag & drop your file here</p>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Supports PDF, DOCX, and TXT up to 10MB</p>
+          <input type="file" id="fileInput" style="display:none;" accept=".pdf,.docx,.txt" onchange="handleFileSelect(event)">
+        </div>
+
+        <div id="uploadStatus" style="display:none; margin-top:1.5rem; text-align:center; color:var(--color-secondary); font-weight:500;">
+          <i class="fa-solid fa-spinner fa-spin"></i> Processing and scoring CV...
+        </div>
+      </div>
+
+      <!-- Live Circular Score Indicator -->
+      <div class="glass-panel score-gauge-container" id="scorePanel">
+        <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-gauge-high"></i> ATS Scorecard</h3>
+        
+        <div class="gauge-wrapper">
+          <svg class="gauge-svg">
+            <defs>
+              <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="var(--color-primary)" />
+                <stop offset="100%" stop-color="var(--color-secondary)" />
+              </linearGradient>
+            </defs>
+            <circle class="gauge-bg" cx="90" cy="90" r="80" />
+            <circle class="gauge-fill" id="gaugeFill" cx="90" cy="90" r="80" />
+          </svg>
+          <div class="score-text" id="scoreText">0</div>
+        </div>
+
+        <h4 id="strengthText" style="color:var(--color-primary); font-size:1.2rem; margin-bottom:0.25rem;">Upload a resume to begin</h4>
+        <p id="roleText" style="color:var(--text-muted); font-size:0.9rem;">No data scanned yet</p>
+      </div>
+
+    </div>
+
+    <!-- Detailed Analysis Feedbacks (only shown when scored) -->
+    <div class="analyzer-grid" id="analysisResultPanel" style="display:none; margin-bottom: 3rem;">
+      
+      <!-- Left column: Checklist & Skills -->
+      <div style="display:flex; flex-direction:column; gap:2rem;">
+        
+        <!-- Checklist -->
+        <div class="glass-panel">
+          <h3 style="margin-bottom:1.5rem; font-size:1.1rem; border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem;">
+            <i class="fa-solid fa-address-card"></i> Contact Information
+          </h3>
+          <div id="contactChecklist">
+            <!-- Dynamic checks -->
+          </div>
+        </div>
+
+        <!-- Skills Badge -->
+        <div class="glass-panel">
+          <h3 style="margin-bottom:1.5rem; font-size:1.1rem; border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem;">
+            <i class="fa-solid fa-tags"></i> Extracted Skills
+          </h3>
+          <div class="badge-container" id="extractedSkills">
+            <!-- Dynamic skills -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right column: Grammar issues and Suggestions -->
+      <div style="display:flex; flex-direction:column; gap:2rem;">
+        
+        <!-- Suggestions -->
+        <div class="glass-panel">
+          <h3 style="margin-bottom:1.5rem; font-size:1.1rem; border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem; color: var(--color-warning);">
+            <i class="fa-solid fa-lightbulb"></i> Recommended Improvements
+          </h3>
+          <div id="suggestionsList">
+            <!-- Dynamic list -->
+          </div>
+        </div>
+
+        <!-- Grammar Check -->
+        <div class="glass-panel">
+          <h3 style="margin-bottom:1.5rem; font-size:1.1rem; border-bottom:1px solid var(--border-glass); padding-bottom:0.5rem; color: var(--color-danger);">
+            <i class="fa-solid fa-spell-check"></i> Grammar & Readability
+          </h3>
+          <div id="grammarList">
+            <!-- Dynamic grammar issues -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- History Panel -->
+    <div class="glass-panel" id="historyPanel" style="display:none;">
+      <h3 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-clock-rotate-left"></i> Analysis History</h3>
+      <div style="overflow-x:auto;">
+        <table class="candidate-table" style="margin-top:0;">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Resume Name</th>
+              <th>Predicted Role</th>
+              <th>ATS Score</th>
+              <th>Profile Strength</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <!-- Dynamic history rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/analyzer.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "Modern Minimalist",
+  "fontFamily": "Inter, sans-serif",
+  "primaryColor": "#6366f1",
+  "secondaryColor": "#a855f7",
+  "backgroundColor": "#ffffff",
+  "textColor": "#374151",
+  "fontSize": "10pt",
+  "headerAlignment": "center",
+  "borders": "thick-bottom"
+}

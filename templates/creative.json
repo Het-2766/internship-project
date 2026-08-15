@@ -1,0 +1,11 @@
+{
+  "name": "Creative Designer",
+  "fontFamily": "Outfit, sans-serif",
+  "primaryColor": "#312e81",
+  "secondaryColor": "#6366f1",
+  "backgroundColor": "#faf5ff",
+  "textColor": "#1f2937",
+  "fontSize": "10pt",
+  "headerAlignment": "left",
+  "borders": "gradient-side"
+}

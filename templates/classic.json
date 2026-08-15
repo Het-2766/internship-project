@@ -1,0 +1,11 @@
+{
+  "name": "Classic Editorial",
+  "fontFamily": "Georgia, serif",
+  "primaryColor": "#1f2937",
+  "secondaryColor": "#4b5563",
+  "backgroundColor": "#fcfbf7",
+  "textColor": "#111827",
+  "fontSize": "11pt",
+  "headerAlignment": "left",
+  "borders": "double-line"
+}
